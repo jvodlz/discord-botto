@@ -7,7 +7,9 @@ from replit import db
 from keep_alive import keep_alive
 import lang
 
-client = discord.Client()
+intents = discord.Intents.default()
+intents.message_content = True
+client = discord.Client(intents=intents)
 
 grey_words = ['unhappy', 'sorrowful', 'dejected', 'regretful', 'depressed', 'downcast', 'miserable', 'downhearted', 'down', 'despondent', 'despairing', 'disconsolate', 'out of sorts', 'desolate', 'bleak', 'wretched', 'glum', 'gloomy', 'doleful', 'dismal', 'blue', 'melancholy', 'melancholic', 'low-spirited', 'mournful', 'woeful', 'forlorn', 'crestfallen', 'broken-hearted', 'heartbroken', 'inconsolable', 'grief-stricken', 'down in the dumps', 'tragic', 'unfortunate', 'feel awful', 'pitiful', 'pitiable', 'grievous', 'traumatic', 'upsetting', 'depressing', 'distressing', 'dispiriting', 'heartbreaking', 'agonizing', 'distressed', 'distressful', 'regrettable', 'feel sorry', 'deplorable', 'lamentable', 'pathetic', 'shameful', 'disgraceful', 'sad', 'saddened', 'dispirited', 'low', 'heavy-hearted', 'morose', 'weighed down', 'oppressed', 'tearful', 'upset', 'disheartened', 'discouraged', 'daunted', 'pessimistic', 'fed up', 'feel shit']
 
@@ -62,20 +64,21 @@ if "toggle_otto" not in db.keys():
 def get_quote():
     response = requests.get("https://zenquotes.io/api/random")
     json_data = json.loads(response.text)
-    quote = json_data[0]['q'] + "\n - " + json_data[0]['a']
+    quote = json_data[0]['q'] + '\n— ' + json_data[0]['a']
     return quote
+
 
 def get_stoic_quote():
     handle = requests.get("https://stoic-server.herokuapp.com/random")
     json_data = json.loads(handle.text)
-    quote = json_data[0]['body'] + '\n - ' + json_data[0]['author'] + ' ({})'.format(json_data[0]['quotesource'])
+    quote = json_data[0]['body'] + '\n— ' + json_data[0]['author'] + ' ({})'.format(json_data[0]['quotesource'])
     return quote
 
 def quote_bystoic(phil):
     handle = requests.get("https://stoic-server.herokuapp.com/search/{}".format(phil))
     total_quotes = len(json.loads(handle.text))
     json_line = json.loads(handle.text)[random.randrange(total_quotes)] 
-    quote = json_line['body'] + '\n - ' + json_line['author'] + ' ({})'.format(json_line['quotesource'])
+    quote = json_line['body'] + '\n— ' + json_line['author'] + ' ({})'.format(json_line['quotesource'])
     return quote
 
 def add_encouragements(encouraging_message):

@@ -22,4 +22,4 @@ There are a few things that are required and set up before the bot can be used:
   
   ## API used to generate quotes
   - [zenquotes.io](https://zenquotes.io/api/random)
-  - [stoic-api.herokuapp.com](https://stoic-api.herokuapp.com)
+  - [~~stoic-api.herokuapp.com~~](https://stoic-api.herokuapp.com) (No longer available)
