@@ -19,7 +19,7 @@ starter_encouragements = [
   "Just remember, peaks and troughs"
 ]
 
-# create separate dictionary for makind edits to command
+# create separate dictionary for making edits to command
 command_help = {
     ".inspire": "Returns a random quote", 
     ".new_enc": "Add encouragement", 
@@ -29,7 +29,7 @@ command_help = {
     ".toggle_otto": "Instruct dog to come or go"
     }
 
-# Write Fn to Add/Del otto_talk,  db["hey otto"]
+# TO-DO: Write Fn to Add/Del otto_talk,  db["default_greeting_key"]
 otto_talk = {
     "greet" : {
         "English" : ["How can I help?", "Sup", "Woof!", "Hi there"], 
@@ -45,16 +45,18 @@ otto_talk = {
 if "respond_enc" not in db.keys():
     db["respond_enc"] = True
 
-if "command help" not in db.keys():
-    db["command help"] = {}
+help_key = "command help"
+if help_key not in db.keys():
+    db[help_key] = {}
 else:
-    db["command help"] = dict(command_help)
+    db[help_key] = dict(help_key)
 
 if "encouragements" not in db.keys() or len(db["encouragements"]) == 0:
     db["encouragements"] = list(starter_encouragements)
 
-if "hey otto" not in db.keys() or len(db["hey otto"]) == 0:
-    db["hey otto"] = dict(otto_talk)
+default_greeting_key = "hey otto"
+if "default_greeting_key" not in db.keys() or len(db["default_greeting_key"]) == 0:
+    db["default_greeting_key"] = dict(otto_talk)
 
 # otto toggle
 if "toggle_otto" not in db.keys():
@@ -107,13 +109,16 @@ def display_enc():
     
 def hey_otto(): 
     # then, get random message. 
-    greet_lang = random.choice(list(db["hey otto"]["greet"]))
-    greeting_index = random.randrange(len(db["hey otto"]["greet"][greet_lang]))
+    greet_lang = random.choice(list(db["default_greeting_key"]["greet"]))
+    greeting_index = random.randrange(len(db["default_greeting_key"]["greet"][greet_lang]))
 
     # if message is not in EN, get EN message and orig_message language
     if greet_lang != "English":
-        return "{}\nI just said '{}' in {}, if you're at all curious".format(db["hey otto"]["greet"][greet_lang][greeting_index], db["hey otto"]["greet"]["English"][greeting_index], greet_lang)
-    return db["hey otto"]["greet"][greet_lang][greeting_index]
+        return "{}\nI just said '{}' in {}, if you're at all curious".format(
+            db["default_greeting_key"]["greet"][greet_lang][greeting_index], 
+            db["default_greeting_key"]["greet"]["English"][greeting_index], 
+            greet_lang)
+    return db["default_greeting_key"]["greet"][greet_lang][greeting_index]
 
 
 @client.event
@@ -143,7 +148,7 @@ async def on_message(message):
     if msg.lower().startswith("how interesting") or msg.lower().startswith("is it really?"):
         await message.channel.send('It is indeed')
 
-    if msg.lower() == "hey otto":
+    if msg.lower() == "default_greeting_key":
         # run function, returns message, language and translation if message not in EN
         await post.send(hey_otto())
 
@@ -153,7 +158,7 @@ async def on_message(message):
 
     # random quote by philosopher
     if "quote" in msg.lower().split():
-        locat = db["hey otto"]["philosopher"]
+        locat = db["default_greeting_key"]["philosopher"]
         if any(phil in msg.lower() for phil in locat):
             stoic = [phil for phil in locat if phil in msg.lower()]
             rando_quote = quote_bystoic(stoic[0])
@@ -172,7 +177,7 @@ async def on_message(message):
         # slice message after command
         encouraging_message = msg.split('.new_enc ',1)[1]
         add_encouragements(encouraging_message)
-        await post.send(f"NEW encouragement added.")
+        await post.send("NEW encouragement added.")
 
     if msg.startswith('.del_enc'):
         encouragements = []
