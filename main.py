@@ -38,9 +38,8 @@ otto_talk = {
         "Russian" : ["Чем я могу помочь?", "Что нового?", "Гав!", "Привет"],
         "German" : ["Wie kann ich helfen?", "Wie geht's?", "Wuff!", "Grüß dich"],
         "Dutch" : ["Hoe kan ik helfen?", "Hé", "Woef!", "Hallo daar"]
-    }, 
-    "philosopher" : ["epictetus", "marcus aurelius", "seneca"]
     }
+}
 
 if "respond_enc" not in db.keys():
     db["respond_enc"] = True
@@ -71,16 +70,9 @@ def get_quote():
 
 
 def get_stoic_quote():
-    handle = requests.get("https://stoic-server.herokuapp.com/random")
+    handle = requests.get("https://stoic-quotes.com/api/quote")
     json_data = json.loads(handle.text)
-    quote = json_data[0]['body'] + '\n— ' + json_data[0]['author'] + ' ({})'.format(json_data[0]['quotesource'])
-    return quote
-
-def quote_bystoic(phil):
-    handle = requests.get("https://stoic-server.herokuapp.com/search/{}".format(phil))
-    total_quotes = len(json.loads(handle.text))
-    json_line = json.loads(handle.text)[random.randrange(total_quotes)] 
-    quote = json_line['body'] + '\n— ' + json_line['author'] + ' ({})'.format(json_line['quotesource'])
+    quote = json_data['text'] + '\n— ' + json_data['author']
     return quote
 
 def add_encouragements(encouraging_message):
@@ -155,14 +147,6 @@ async def on_message(message):
     if msg.lower().startswith("inspire"):
         quote = get_quote()
         await post.send(quote)
-
-    # random quote by philosopher
-    if "quote" in msg.lower().split():
-        locat = db["default_greeting_key"]["philosopher"]
-        if any(phil in msg.lower() for phil in locat):
-            stoic = [phil for phil in locat if phil in msg.lower()]
-            rando_quote = quote_bystoic(stoic[0])
-            await post.send(rando_quote)
 
     if "stoic" in msg.lower().split():
         await post.send(get_stoic_quote())
