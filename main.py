@@ -5,6 +5,9 @@ import json
 import random
 from replit import db
 from keep_alive import keep_alive
+from dotenv import load_dotenv
+
+load_dotenv()
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -215,4 +218,4 @@ async def on_message(message):
   
 
 keep_alive()
-client.run(os.environ['TOKEN'])
+client.run(os.env('TOKEN'))
