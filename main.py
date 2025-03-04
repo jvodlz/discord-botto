@@ -5,7 +5,6 @@ import json
 import random
 from replit import db
 from keep_alive import keep_alive
-import lang
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -214,9 +213,6 @@ async def on_message(message):
             db["respond_enc"] = False
             await post.send("otto has gone to take a nap")
   
-    if msg.startswith(".langf"):
-        to_detect = msg.split(".langf ",1)
-        await post.send(lang.lang_detect(to_detect[1]))
 
 keep_alive()
 client.run(os.environ['TOKEN'])
