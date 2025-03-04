@@ -1,18 +1,18 @@
 import discord
+from discord.ext import commands
 import os
 import requests
 import json
 import random
-from replit import db
-from keep_alive import keep_alive
+# from keep_alive import keep_alive
 from dotenv import load_dotenv
 
 load_dotenv()
 
 intents = discord.Intents.default()
 intents.message_content = True
-client = discord.Client(intents=intents)
-
+intents.messages = True
+bot = commands.Bot(command_prefix='/', intents=intents)
 
 """
 Initial Responses
@@ -54,6 +54,7 @@ command_help = {
     ".list_greet": "Display **ALL** greetings"
 }
 
+# Write Fn to Add/Del otto_talk
 otto_talk = {
     "greet": {
         "English": ["How can I help?", "Sup", "Woof!", "Hi there"],
@@ -72,179 +73,211 @@ toggles = {
     "otto": True
 }
 
-if "respond_enc" not in db.keys():
-    db["respond_enc"] = True
 
-help_key = "command help"
-if help_key not in db.keys():
-    db[help_key] = {}
-else:
-    db[help_key] = dict(help_key)
-
-if "encouragements" not in db.keys() or len(db["encouragements"]) == 0:
-    db["encouragements"] = list(starter_encouragements)
-
-default_greeting_key = "hey otto"
-if "default_greeting_key" not in db.keys() or len(db["default_greeting_key"]) == 0:
-    db["default_greeting_key"] = dict(otto_talk)
-
-# otto toggle
-if "toggle_otto" not in db.keys():
-    db["toggle_otto"] = True
-
-
-def get_quote():
-    response = requests.get("https://zenquotes.io/api/random")
-    json_data = json.loads(response.text)
-    quote = json_data[0]['q'] + '\n— ' + json_data[0]['a']
-    return quote
-
-
-def get_stoic_quote():
-    handle = requests.get("https://stoic-quotes.com/api/quote")
-    json_data = json.loads(handle.text)
-    quote = json_data['text'] + '\n— ' + json_data['author']
-    return quote
-
-def add_encouragements(encouraging_message):
-    prep_msg = encouraging_message.split('.')
+"""
+Development Functions
+"""
+async def add_encouragements(message, post):
+    prep_msg = message.split('.')
     out = '. '.join(sentence.strip().capitalize() for sentence in prep_msg)
-    db["encouragements"].append(out)
+    encouragements.add(out)
+    await post.send(f"**NEW encouragement** added: ***{out}***\nHopefully you got the spelling right")
 
-def delete_encouragement(index):
-    encouragements = db["encouragements"]
-    if len(encouragements) > index:
-        del encouragements[index]
-        db["encouragements"] = encouragements
+
+async def delete_encouragement(message, post):
+    try:
+        encouragements.remove(message)
+    except KeyError:
+        await post.send("Oopsie daisies!?!? The **encouragement** you want to remove does not exist. Please check your spelling.")
+    else:
+        await post.send(f"***{message}*** has been removed")
+
 
 def display_help():
-    out = ''
-    for key in command_help:
-        if len(out) < 1:
-          prep = '+ ' + str(key) + ': ' + str(command_help[key])
-        else:
-          prep = '\n+ ' + str(key) + ': ' + str(command_help[key])
-        out += prep
-    return out
+    return '\n'.join(f'+ **{key}**:   *{command_help[key]}*' for key in command_help)
+
 
 def display_enc():
-    return '\n'.join(str(i+1) + ' -  ' + db["encouragements"][i] for i in range(len(db["encouragements"])))
-    
-def hey_otto(): 
-    # then, get random message. 
-    greet_lang = random.choice(list(db["default_greeting_key"]["greet"]))
-    greeting_index = random.randrange(len(db["default_greeting_key"]["greet"][greet_lang]))
-
-    # if message is not in EN, get EN message and orig_message language
-    if greet_lang != "English":
-        return "{}\nI just said '{}' in {}, if you're at all curious".format(
-            db["default_greeting_key"]["greet"][greet_lang][greeting_index], 
-            db["default_greeting_key"]["greet"]["English"][greeting_index], 
-            greet_lang)
-    return db["default_greeting_key"]["greet"][greet_lang][greeting_index]
+    return '\n'.join(f'*{i+1}*  **{message}**' for i, message in enumerate(encouragements))
 
 
-@client.event
+async def add_greeting(lang, message, post):
+    clean_lang = lang.lower().strip().capitalize()
+    clean_msg = [phrase.capitalize() for phrase in message.lower().split(",")]
+    otto_talk['greet'][clean_lang] = clean_msg
+    if clean_lang not in otto_talk['greet']:
+        await post.send(f"{clean_lang}: {clean_msg} has been added")
+    else:
+        await post.send(f"**{clean_lang}** has been updated with: *{clean_msg}*")
+
+
+async def delete_greeting_lang(lang, post):
+    clean_lang = lang.lower().capitalize()
+    if clean_lang in otto_talk['greet']:
+        removed = otto_talk['greet'].pop(clean_lang)
+        await post.send(f"**{clean_lang}**: *{removed}* has been removed")
+    else:
+        await post.send(f"***{clean_lang}*** greetings do not exist")
+
+def display_greet():
+    return '\n'.join(f"*{i}* **{lang}**: {greetings}" for i, (lang, greetings) in enumerate(otto_talk['greet'].items(), start=1))
+
+
+"""
+Helpers
+"""
+def otto_greet():
+    lang = random.choice(list(otto_talk['greet'].keys()))
+    greet_index = random.randrange(len(otto_talk['greet'][lang]))
+    out = otto_talk['greet'][lang][greet_index]
+    if lang != "English":
+        return out + f"\nI just said ***'{otto_talk['greet']['English'][greet_index]}'*** in **{lang}**, if you're at all curious"
+    return out
+
+
+async def get_quote():
+    response = requests.get("https://zenquotes.io/api/random")
+    json_data = json.loads(response.text)
+    quote = f"*{json_data[0]['q']}*\n— **{json_data[0]['a']}**"
+    return quote
+
+
+async def get_stoic_quote():
+    handle = requests.get("https://stoic-quotes.com/api/quote")
+    json_data = json.loads(handle.text)
+    quote = f"*{json_data['text']}*\n— **{json_data['author']}**"
+    return quote
+
+
+"""
+Commands
+"""
+@bot.event
 # When Bot ready, prints User's name
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+    await bot.tree.sync()
+    print('We have logged in as {0.user}'.format(bot))
 
-@client.event
+
+@bot.tree.command(name='inspire', description='Get an inspirational quote')
+async def inspire(interaction: discord.Interaction):
+    await interaction.response.defer(thinking=True)
+    quote = await get_quote()
+    await interaction.followup.send(quote)
+
+
+@bot.tree.command(name='stoic', description='Returns a stoic quote')
+async def stoic(interaction: discord.Interaction):
+    await interaction.response.defer(thinking=True)
+    quote = await get_stoic_quote()
+    await interaction.followup.send(quote)
+
+
+@bot.tree.command(name='hello', description='Say hello')
+async def hello(interaction: discord.Interaction):
+    lang = random.choice(list(otto_talk['greet'].keys()))
+    out = otto_talk['greet'][lang][3]
+    await interaction.response.send_message(out)
+
+
+@bot.tree.command(name='toggle-otto', description='Instruct Hond to come or go')
+async def toggle_otto(interaction: discord.Interaction):
+    toggles['otto'] = not toggles['otto']
+
+    if toggles['otto']:
+        await interaction.response.send_message("otto is here!")
+    else:
+        await interaction.response.send_message("otto has gone to take a nap")
+
+
+@bot.tree.command(name='encouragement-toggle', description='Toggle encouragement Message')
+async def enc_toggle(interaction: discord.Interaction):
+    toggles['respond_enc'] = not toggles['respond_enc']
+    out = "ON" if toggles['respond_enc'] else "OFF"
+    await interaction.response.send_message(f'**Encouragement** Message is now ***{out}***')
+
+
+@bot.event
 # when message is from Users, not Bot itself
 async def on_message(message):
-    if message.author == client.user:
+    if message.author == bot.user:
         return
-  
-    # Bot command begins '.' Use as Test
-    if message.content.startswith('.hello'):
-        await message.channel.send('Hello!')
+
+    await bot.process_commands(message)
 
     # Shortcuts
     msg = message.content
     post = message.channel
 
-    # if otto toggle ON
-    if db["toggle_otto"]:
-        if msg.lower().startswith("what is your name?") or msg.lower().startswith("is your name dog?"):
-          await post.send('My name is otto')
-
-    if msg.lower().startswith("how interesting") or msg.lower().startswith("is it really?"):
+    if msg.lower().startswith("how interesting") or msg.lower().startswith(
+            "is it really?"):
         await message.channel.send('It is indeed')
 
-    if msg.lower() == "default_greeting_key":
-        # run function, returns message, language and translation if message not in EN
-        await post.send(hey_otto())
+    if msg.lower() == "hey otto" and toggles['otto']:
+        await post.send(otto_greet())
 
-    if msg.lower().startswith("inspire"):
-        quote = get_quote()
-        await post.send(quote)
+    # Grey words handling
+    if toggles['respond_enc']:
+        words = msg.lower().split()
+        for i, word in enumerate(words):
+            if word in grey_words:
+                if i > 0 and words[i-1] == "not":
+                    continue
+                else:
+                    await post.send(random.choice(list(encouragements)))
+                    break
 
-    if "stoic" in msg.lower().split():
-        await post.send(get_stoic_quote())
-
-    # Encouragement ON
-    if db["respond_enc"]:
-        if any(word in msg.lower().split() for word in grey_words):
-            await post.send(random.choice(db["encouragements"]))
-
-    # Commands
-    if msg.startswith('.new_enc'):
-        # slice message after command
-        encouraging_message = msg.split('.new_enc ',1)[1]
-        add_encouragements(encouraging_message)
-        await post.send("NEW encouragement added.")
-
-    if msg.startswith('.del_enc'):
-        encouragements = []
-        if "encouragements" in db.keys():
-          index = int(msg.split(".del_enc",1)[1])
-          # Display_enc shows Enc start at 1, i.e. NOT 0 index
-          if index > 0 and index <= len(db["encouragements"]):
-            delete_encouragement(index - 1)
-            encouragements = list(db["encouragements"])
-            await post.send("Changes to Encouragements has been made")
-            await post.send(encouragements)
-          else:
-            await post.send(f'Oh dear, this selection is unavailable. Please choose a value between 1 and {len(db["encouragements"])} next time')
-
-    if msg.startswith(".list_enc"):
-        if "encouragements" in db.keys():
-          encouragements = db["encouragements"]
+    """
+    Development Function Command Calls
+    """
+    if msg.startswith(".new_enc"):
+        try:
+            encouraging_message = msg.split('.new_enc ', maxsplit=2)[1]
+        except IndexError:
+            await post.send("Hmm... Did you forget to mention the new **Encouragement**?")
         else:
-          encouragements = []
-        await post.send(encouragements)
+            await add_encouragements(encouraging_message, post)
 
-    if msg.startswith(".help"):
+    elif msg.startswith(".del_enc"):
+        parts = msg.split(".del_enc", maxsplit=2)
+        if len(parts) > 1:
+            enc_for_removal = parts[1].strip()
+            await delete_encouragement(enc_for_removal, post)
+        else:
+            await post.send("Hmm... Did you forget to mention the **Encouragement** for removal?")
+
+    elif msg.startswith(".list_enc"):
+        out = "\n".join(boost for boost in encouragements)
+        await post.send(out)
+
+    elif msg.startswith(".new_greet"):
+        try:
+            entry = msg.split('.new_greet ', maxsplit=2)[1]
+            lang, greeting = entry.split("|")
+
+        except IndexError:
+            await post.send("Hmm... Did you forget to mention the new **Greeting**?")
+        except ValueError:
+            await post.send("Hmm... Maybe check the formatting real quick. language|a,b,c,d")
+        else:
+            await add_greeting(lang, greeting, post)
+
+    elif msg.startswith(".del_greet_lang"):
+        parts = msg.split(".del_greet_lang", maxsplit=2)
+        if len(parts) > 1:
+            lang_removal = parts[1].strip()
+            await delete_greeting_lang(lang_removal, post)
+        else:
+            await post.send("Hmm... Did you forget to mention the **Greeting Language** for removal?")
+
+    elif msg.startswith(".list_greet"):
+        await post.send(display_greet())
+
+    elif msg.startswith(".help"):
         await post.send(display_help())
 
-    if msg.startswith(".show_db_keys"):
-        key_str = '\n'.join(key for key in db.keys())
-        await post.send(key_str)
-        await post.send("----- Done -----")
-
-    if msg.startswith(".display_enc"):
+    elif msg.startswith(".display_enc"):
         await post.send(display_enc())
 
-
-    ## Toggles
-    if msg.startswith(".respond_enc"):
-        value = msg.split(".respond_enc ",1)[1]
-        if value.lower() == "true":
-            db["respond_enc"] = True
-            await post.send("Encouragement Response is ON")
-        else:
-            db["respond_enc"] = False
-            await post.send("Encouragement Response is OFF")
-
-    if msg.startswith(".toggle_otto"):
-        value = msg.split(".toggle_otto ",1)[1]
-        if value.lower() == "true":
-            db["respond_enc"] = True
-            await post.send("otto is here!")
-        else:
-            db["respond_enc"] = False
-            await post.send("otto has gone to take a nap")
-  
-
-keep_alive()
-client.run(os.env('TOKEN'))
+# keep_alive()
+bot.run(os.getenv('TOKEN'))
