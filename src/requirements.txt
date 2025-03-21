@@ -1,0 +1,5 @@
+flask
+discord-interactions
+python-dotenv
+asgiref
+mangum
