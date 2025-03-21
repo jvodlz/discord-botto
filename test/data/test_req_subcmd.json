@@ -1,7 +1,13 @@
 {
   "data": {
     "id": "some interaction ID",
-    "name": "hello",
+    "name": "inspire",
+    "options": [
+      {
+        "name": "random",
+        "type": 1
+      }
+    ],
     "type": 1
   },
   "token": "some continuation token for responding to the interaction",
