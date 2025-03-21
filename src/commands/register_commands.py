@@ -1,11 +1,7 @@
 import requests
 import yaml
-import os
-import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config.config import TOKEN, APPLICATION_ID
-
+from config import TOKEN, APPLICATION_ID
 
 URL = f"https://discord.com/api/v10/applications/{APPLICATION_ID}/commands"
 
