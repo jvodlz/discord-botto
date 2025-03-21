@@ -1,13 +1,18 @@
 import requests
 import yaml
 import os
-from dotenv import load_dotenv
+import sys
 
-load_dotenv()
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from config.config import TOKEN, APPLICATION_ID
 
-TOKEN = os.getenv('TOKEN')
-APPLICATION_ID = os.getenv('APPLICATION_ID')
+
 URL = f"https://discord.com/api/v10/applications/{APPLICATION_ID}/commands"
+
+headers = {
+    "Authorization": f"Bot {TOKEN}",
+    "Content-Type": "application/json"
+}
 
 with open("commands.yaml", "r") as file:
     data = file.read()

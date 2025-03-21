@@ -6,7 +6,7 @@
   options:
     - name: random
       description: Returns a random quote
-      type: 1 # SUC_COMMAND 
+      type: 1 # SUB_COMMAND 
     - name: stoic
       description: Returns a stoic quote
       type: 1
