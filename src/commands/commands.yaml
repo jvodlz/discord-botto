@@ -11,12 +11,3 @@
       description: Returns a stoic quote
       type: 1
       
-- name: toggle
-  description: Toggle selected option
-  options:
-    - name: otto
-      description: Instruct Hond to come or go
-      type: 1
-    - name: encouragement
-      description: Toggle encouragement message
-      type: 1
