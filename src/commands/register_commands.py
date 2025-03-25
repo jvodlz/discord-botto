@@ -10,7 +10,7 @@ headers = {
     "Content-Type": "application/json"
 }
 
-with open("commands.yaml", "r") as file:
+with open("commands/commands.yaml", "r") as file:
     data = file.read()
 
 commands = yaml.safe_load(data)

@@ -10,4 +10,35 @@
     - name: stoic
       description: Returns a stoic quote
       type: 1
-      
+
+- name: weather
+  description: Get current weather forecast or search if city is available for forecast information
+  options:
+    - name: info
+      description: Weather information commands
+      type: 2 # SUB_COMMAND_GROUP 
+      options:
+      - name: forecast
+        description: Get the forecast for city by country or with specified area/region
+        type: 1
+        options:
+        - name: city
+          description: The city for the weather forecast
+          type: 3 # STRING
+          required: true
+        - name: country
+          description: The country of the city
+          type: 3
+          required: true
+        - name: area
+          description: The specific area/region in the city
+          type: 3
+          required: false
+      - name: search
+        description: Check whether a city has available forecast information
+        type: 1
+        options:
+          - name: city
+            description: The city to search
+            type: 3  
+            required: true
