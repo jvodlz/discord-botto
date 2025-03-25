@@ -1,5 +1,4 @@
 import requests
-import json
 
 from config import TOKEN, APPLICATION_ID
 
@@ -18,11 +17,10 @@ commands = {
     'toggle'
 }
 
-del_cmd_len = len(commands)
+remaining = len(commands)
 
 response = requests.get(URL, headers=headers)
 registered_commands = response.json()
-# print(json.dumps(registered_commands, indent=2))
 
 # Delete command operation
 for del_cmd in commands:
@@ -33,11 +31,11 @@ for del_cmd in commands:
 
             response = requests.delete(del_url, headers=headers)
             print(f"<<<<< Deleting command: {del_cmd}  [ status: {response.status_code} ]")
-            del_cmd_length -= 1
+            remaining -= 1
             break
     else:
         print("\n" + "***")
         print(f"The command: [{del_cmd}] Does Not Exist")
         print("***" + "\n")
 
-print(f"----- SUCCESSFULLY REMOVED {len(commands) - del_cmd_len} out of {del_cmd_len} -----")
+print(f"----- SUCCESSFULLY REMOVED {len(commands) - remaining} out of {len(commands)} -----")
