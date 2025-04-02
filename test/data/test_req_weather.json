@@ -1,6 +1,7 @@
 {
+  "id": "some interaction ID",
   "data": {
-    "id": "some interaction ID",
+    "id": "some command ID",
     "name": "weather",
     "type": 1,
     "options": [

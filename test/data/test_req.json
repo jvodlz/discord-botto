@@ -1,6 +1,7 @@
 {
+  "id": "some interaction ID",
   "data": {
-    "id": "some interaction ID",
+    "id": "some command ID",
     "name": "hello",
     "type": 1
   },
