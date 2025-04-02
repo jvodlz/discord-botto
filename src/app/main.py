@@ -2,8 +2,9 @@ from flask import Flask, jsonify, request
 from discord_interactions import verify_key_decorator
 from asgiref.wsgi import WsgiToAsgi
 from mangum import Mangum
+import httpx
 
-from config import PUBLIC_KEY
+from config import PUBLIC_KEY, APPLICATION_ID, TOKEN
 from commands import greet, inspire, weather
 
 app = Flask(__name__)
@@ -54,6 +55,32 @@ async def handle_weather(data):
     return message_content
 
 
+def handle_defer_callback(interaction_id, interaction_token):
+    URL = f"https://discord.com/api/v10/interactions/{interaction_id}/{interaction_token}/callback"
+    deferred_response = {"type": 5} # DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE
+    try:
+        response = httpx.post(URL, json=deferred_response)
+        print(f">> Deferring interaction: {interaction_id}  [ status: {response.status_code} ]")
+    except httpx.RequestError as e:
+        print("Uh oh! An error occurred while deferring the response")
+        print(e)
+
+
+async def update_original_interaction_reponse(interaction_token, data):
+    URL = f"https://discord.com/api/v10/webhooks/{APPLICATION_ID}/{interaction_token}/messages/@original"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bot {TOKEN}"
+    }
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.patch(URL, json=data, headers=headers)
+            response.raise_for_status()
+        except httpx.RequestError as e:
+            print("Hmm... an error occurred while sending interaction response")
+            print(e)
+
+
 @verify_key_decorator(PUBLIC_KEY)
 async def interact(raw_request):
     response_data = {"type": 1}
@@ -61,6 +88,10 @@ async def interact(raw_request):
         return jsonify(response_data)
 
     elif raw_request["type"] == 2:  # APPLICATION_COMMAND
+        interaction_id = raw_request["id"]
+        interaction_token = raw_request["token"]
+        handle_defer_callback(interaction_id, interaction_token)
+
         data = raw_request["data"]
         command_name = get_cmd(data)
 
@@ -85,8 +116,9 @@ async def interact(raw_request):
             },
         }
 
-        return jsonify(response_data)
+        await update_original_interaction_reponse(interaction_token, response_data)
 
+    return '', 204  # No Content
 
 if __name__ == "__main__":
     app.run(debug=True)
