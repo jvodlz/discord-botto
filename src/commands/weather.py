@@ -92,7 +92,7 @@ def get_weather_icon(weather_id: int, condition: str) -> str:
             return ":snowman2:"
         return ":cloud_snow:"
     elif condition == "Clear":
-        return ":sunny"
+        return ":sunny:"
     elif condition == "Atmosphere" or condition == "Clouds":
         return icon_map.get(weather_id, "")
 
@@ -145,16 +145,16 @@ async def get_forecast(geo_data) -> str:
     out = (
         f"Weather in {flag} **{location}**, ***{country}***\n"
         f"***Temperature***: **{temp}°C** ( Feels like {temperature_icon} **{feels_like}°C** )\n"
-        f"***Condition***: {condition_out}**\n"
-        f"***Humidity***: **{humidity}%**\n"
-        f"***Wind Speed***: **{wind_speed} m/s**\n"
-        f"***Cloudiness***: **{cloudiness}%**\n"
+        f"***Condition***: {condition_out}\n"
+        f"***Humidity***: :sweat_drops: **{humidity}%**\n"
+        f"***Wind Speed***: :dash: **{wind_speed} m/s**\n"
+        f"***Cloudiness***: :cloud: **{cloudiness}%**\n"
     )
 
     if rain:
         out += f"***Precipitation***: :droplet: **{rain} mm/h**\n"
     if snow:
-        out += f"***Snow***: :snow: **{snow} mm/h**\n"
+        out += f"***Snow***: :snowflake: **{snow} mm/h**\n"
     return out
 
 
