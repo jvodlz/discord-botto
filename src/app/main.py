@@ -3,14 +3,19 @@ from discord_interactions import verify_key_decorator
 from asgiref.wsgi import WsgiToAsgi
 from mangum import Mangum
 import httpx
+import logging
 
 from config import PUBLIC_KEY, APPLICATION_ID, TOKEN
 from commands import greet, inspire, weather
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+
 app = Flask(__name__)
 asgi_app = WsgiToAsgi(app)
 handler = Mangum(asgi_app)
-
+logger.info("Create Flask app and Lambda Handler")
 
 @app.route("/", methods=["POST"])
 async def interactions():
@@ -38,9 +43,7 @@ def get_value_at_index(data, index):
 async def handle_weather(data):
     sub_cmd_group = data["options"][0]["name"]
     sub_cmd_group_options = data["options"][0]
-    message_content = (
-        "Uh oh! An error occurred with the weather command. Please try again later."
-    )
+    message_content = "Uh oh! An error occurred with the weather command. Please try again later."
 
     if sub_cmd_group == "info":
         sub_command = get_sub_cmd(sub_cmd_group_options)
@@ -55,30 +58,33 @@ async def handle_weather(data):
     return message_content
 
 
-def handle_defer_callback(interaction_id, interaction_token):
+async def handle_defer_callback(interaction_id, interaction_token):
     URL = f"https://discord.com/api/v10/interactions/{interaction_id}/{interaction_token}/callback"
     deferred_response = {"type": 5} # DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE
-    try:
-        response = httpx.post(URL, json=deferred_response)
-        print(f">> Deferring interaction: {interaction_id}  [ status: {response.status_code} ]")
-    except httpx.RequestError as e:
-        print("Uh oh! An error occurred while deferring the response")
-        print(e)
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(URL, json=deferred_response)
+            logger.info(f">> Deferring interaction: {interaction_id}  [ status: {response.status_code} ]")
+        except httpx.RequestError as e:
+            logger.error(">>>> Uh oh! An error occurred while deferring the response:\n%s", e)
 
 
-async def update_original_interaction_reponse(interaction_token, data):
+async def update_original_interaction_reponse(interaction_token, content):
     URL = f"https://discord.com/api/v10/webhooks/{APPLICATION_ID}/{interaction_token}/messages/@original"
     headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bot {TOKEN}"
+        "Content-Type": "application/json"
+    }
+    data = {
+        "content": content
     }
     async with httpx.AsyncClient() as client:
         try:
             response = await client.patch(URL, json=data, headers=headers)
             response.raise_for_status()
+            return True
         except httpx.RequestError as e:
-            print("Hmm... an error occurred while sending interaction response")
-            print(e)
+            logger.error(">>>> Hmm... an error occurred while sending interaction response:\n%s", e)
+            return False
 
 
 @verify_key_decorator(PUBLIC_KEY)
@@ -90,10 +96,12 @@ async def interact(raw_request):
     elif raw_request["type"] == 2:  # APPLICATION_COMMAND
         interaction_id = raw_request["id"]
         interaction_token = raw_request["token"]
-        handle_defer_callback(interaction_id, interaction_token)
+        logger.info(">> Deferring interaction callback")
+        await handle_defer_callback(interaction_id, interaction_token)
 
         data = raw_request["data"]
         command_name = get_cmd(data)
+        message_content = "Hmm... an error occurred while sending interaction response"
 
         if command_name == "hello":
             message_content = greet()
@@ -116,9 +124,11 @@ async def interact(raw_request):
             },
         }
 
-        await update_original_interaction_reponse(interaction_token, response_data)
+    logger.info(">> Updating original interaction response")
+    if not await update_original_interaction_reponse(interaction_token, message_content):
+        logger.info(">> Error updating original interaction response")
 
-    return '', 204  # No Content
+    return jsonify(response_data)
 
 if __name__ == "__main__":
     app.run(debug=True)
