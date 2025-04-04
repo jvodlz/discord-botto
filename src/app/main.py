@@ -6,7 +6,7 @@ import httpx
 import logging
 
 from config import PUBLIC_KEY, APPLICATION_ID
-from commands import greet, inspire, weather
+from commands import greet, inspire, weather, timestamp
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -37,6 +37,12 @@ def get_subcmd_value_at_index(data, index):
         return data["options"][0]["options"][index]["value"]
     except IndexError:
         return None
+
+
+def handle_timestamp(data):
+    date = data["options"][0]["value"]
+    time = data["options"][1]["value"]
+    return timestamp(date, time)
 
 
 async def handle_weather(data):
@@ -106,6 +112,9 @@ async def process_commands(data):
 
     elif command_name == "weather":
         message_content = await handle_weather(data)
+
+    elif command_name == "timestamp":
+        message_content = handle_timestamp(data)
 
     return message_content
 
