@@ -17,9 +17,11 @@ async def weather(option: str, *args) -> str:
         country = args[1] if args[1] is not None else ""
 
         if regex.match(r"^[\p{L} ,'$$.-]+$", location, regex.IGNORECASE) is None:
-            return (
-                "Hmm... Something went wrong. Please check your spelling and try again."
-            )
+            return "Hmm... Something went wrong. Please check your spelling and try again."
+        
+        if location.lower() == "antarctica":
+            geo_data = (-78.1586, 16.4063, "Antarctica", "AQ")
+            return await get_forecast(geo_data)  
 
         geo_data = await get_geodata(location, country)
         if geo_data == (None, None, None, None):
@@ -33,8 +35,7 @@ async def weather(option: str, *args) -> str:
         code = search_country_code(country)
         if code:
             return code
-        else:
-            return f"Uh oh! Unable to find country code for ***{country}***."
+        return f"Uh oh! Unable to find country code for ***{country}***."
 
 
 def create_country_code_dict() -> dict:
