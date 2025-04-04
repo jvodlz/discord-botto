@@ -39,7 +39,7 @@ There are a few things that are required and set up before the bot can be used:
 - Configure AWS Credentials
 - Ensure [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) is set up
 
-# Environment Variables
+## Environment Variables
 Required secrets in `.env` and AWS Lambda:
 - `TOKEN` - Discord bot token
 - `APPLICATION_ID` - Discord application id
