@@ -4,20 +4,20 @@ A Swiss Army knife kind of Discord bot, kind of.
 The project implements a Python Discord bot that is hosted on AWS Lambda within a Docker Container. The infrastructure is managed using AWS Cloud Development Kit (CDK).
 
 ```                                              
-     +----------------+        +----------------+       +--------------------+    +---------------------+
-     |    Discord     |  HTTP  |                |       |                    |    |                     |
-     |  (User Input)  +------->+  API Gateway   +------>+     AWS Lambda     +--->+   CloudWatch Logs   |
-     +----------------+        |                |       |                    |    |                     |
-                               +----------------+       |  +--------------+  |    +---------------------+
-                                                        |  | Docker Image |  |
-                                                        |  +--------------+  |
-                                                        |                    |
-                                                        +---------+----------+
-                                                                  |
-                                                                  v
-                                                           +-------------+
-                                                           |   AWS CDK   |
-                                                           +-------------+
+  +----------------+        +----------------+       +--------------------+    +---------------------+
+  |    Discord     |  HTTP  |                |       |                    |    |                     |
+  |  (User Input)  +------->+  API Gateway   +------>+     AWS Lambda     +--->+   CloudWatch Logs   |
+  +----------------+        |                |       |                    |    |                     |
+                            +----------------+       |  +--------------+  |    +---------------------+
+                                                     |  | Docker Image |  |
+                                                     |  +--------------+  |
+                                                     |                    |
+                                                     +---------+----------+
+                                                               |
+                                                               v
+                                                        +-------------+
+                                                        |   AWS CDK   |
+                                                        +-------------+
 ```
 
 ## What does the bot do?
