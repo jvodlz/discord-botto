@@ -1,0 +1,16 @@
+{
+  "id": "some interaction ID",
+  "data": {
+    "id": "some command ID",
+    "name": "inspire",
+    "options": [
+      {
+        "name": "random",
+        "type": 1
+      }
+    ],
+    "type": 1
+  },
+  "token": "some continuation token for responding to the interaction",
+  "type": 2
+}

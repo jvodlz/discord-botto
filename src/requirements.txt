@@ -1,0 +1,10 @@
+flask
+discord-interactions
+python-dotenv
+asgiref
+mangum
+httpx
+requests
+pyyaml
+pandas
+regex

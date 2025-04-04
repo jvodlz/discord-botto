@@ -1,0 +1,25 @@
+{
+  "id": "some interaction ID",
+  "data": {
+    "id": "some command ID",
+    "name": "timestamp",
+    "description": "Generate a timestamp displayed in the user's local time",
+    "options": [
+      {
+        "name": "date",
+        "description": "The date (e.g. DD/MM/YYYY)",
+        "value": "25/12/2028",
+        "type": 3
+      },
+      {
+        "name": "time",
+        "description": "24-Hour time (e.g. 04:27 or 14:48)",
+        "value": "04:05",
+        "type": 3
+      }
+    ],
+    "type": 1
+  },
+  "token": "some continuation token for responding to the interaction",
+  "type": 2
+}
