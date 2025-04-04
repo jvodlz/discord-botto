@@ -167,4 +167,4 @@ def search_country_code(country: str) -> str:
 
 
 def get_country_by_code(code: str):
-    return code_country_map.get(code, "")
+    return code_country_map.get(code.upper(), "")
