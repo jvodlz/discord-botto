@@ -20,8 +20,7 @@ def validate_date(date_str):
 
 def validate_time(time_str):
     try:
-        hour, minute = map(int, time_str.split(":"))
-        time(hour, minute)
+        datetime.strptime(time_str, "%H:%M")
         return True
     except ValueError:
         return False
