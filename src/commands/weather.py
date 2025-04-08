@@ -42,8 +42,8 @@ def create_country_code_dict() -> dict:
     cwd = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(cwd, "..", "data", "country_codes.csv")
     df = pd.read_csv(data_path)
-    clean_countries = df.country.str.strip().str.lower()
-    data_out = pd.Series(df.iso2.values, index=clean_countries).to_dict()
+    clean_countries = df.common_name.str.strip().str.lower()
+    data_out = pd.Series(df.iso_alpha_2.values, index=clean_countries).to_dict()
     return data_out
 
 
@@ -51,7 +51,7 @@ def create_code_country_dict() -> dict:
     cwd = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(cwd, "..", "data", "country_codes.csv")
     df = pd.read_csv(data_path)
-    data_out = pd.Series(df.country.values, index=df.iso2).to_dict()
+    data_out = pd.Series(df.common_name.values, index=df.iso_alpha_2).to_dict()
     return data_out
 
 
@@ -75,7 +75,7 @@ def get_weather_icon(weather_id: int, condition: str) -> str:
         801: ":white_sun_small_cloud:",
         802: ":partly_sunny:",
         803: ":white_sun_cloud:",
-        804: ":cloud:",
+        804: ":cloud:"
     }
 
     if condition == "Thunderstorm":
@@ -139,12 +139,10 @@ async def get_forecast(geo_data) -> str:
     country = code_country_map.get(country_code) or country_code
     
     #  May not always return an icon for weather condition output
-    condition_out = (
-        f"{weather_icon} **{description}**" if weather_icon else f"**{description}**"
-    )
+    condition_out = f"{weather_icon} **{description}**" if weather_icon else f"**{description}**"
 
     out = (
-        f"Weather in {flag} **{location}**, ***{country}***\n"
+        f"> Weather in {flag} **{location}**, ***{country}***\n"
         f"***Temperature***: **{temp}°C** ( Feels like {temperature_icon} **{feels_like}°C** )\n"
         f"***Condition***: {condition_out}\n"
         f"***Humidity***: :sweat_drops: **{humidity}%**\n"
