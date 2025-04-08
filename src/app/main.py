@@ -4,6 +4,7 @@ from asgiref.wsgi import WsgiToAsgi
 from mangum import Mangum
 import httpx
 import logging
+import asyncio
 
 from config import PUBLIC_KEY, APPLICATION_ID
 from commands import greet, inspire, weather, timestamp
@@ -40,9 +41,27 @@ def get_subcmd_value_at_index(data, index):
 
 
 def handle_timestamp(data):
-    date = data["options"][0]["value"]
-    time = data["options"][1]["value"]
-    return timestamp(date, time)
+    sub_command = get_subcmd(data)
+    if sub_command == "search":
+        if not data["options"][0].get("options"):
+            return "Hmm... we can't search for nothing. Please enter a value for either **code** or **country**"
+        elif len(data["options"][0].get("options")) == 2:
+            return "Hmm... this is tricky. Please enter a value for either **code** or **country**, not both"
+
+        search_field = data["options"][0]["options"][0]["name"]
+        value = data["options"][0]["options"][0]["value"]
+        if search_field == "code" and len(value) != 2:
+            return "Hmm... something went wrong. Please use a valid input e.g. ***FJ***"
+        elif search_field == "country":
+            message_content = timestamp("search", value)
+
+    elif sub_command == "create":
+        date_str = data["options"][0]["options"][0]["value"]
+        time_str = data["options"][0]["options"][1]["value"]
+        tz_str = data["options"][0]["options"][2]["value"]
+        message_content = timestamp("create", date_str, time_str, tz_str)
+
+    return message_content
 
 
 async def handle_weather(data):
@@ -71,9 +90,7 @@ async def handle_defer_callback(interaction_id, interaction_token):
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(URL, json=deferred_response)
-            logger.info(
-                f">> Deferring interaction  [ status: {response.status_code} ]"
-            )
+            logger.info(f">> Deferring interaction  [ status: {response.status_code} ]")
         except httpx.RequestError as e:
             logger.error(
                 f">>>> Uh oh! An error occurred while deferring the response:\n{e}"
@@ -132,7 +149,16 @@ async def interact(raw_request):
         await handle_defer_callback(interaction_id, interaction_token)
 
         data = raw_request["data"]
-        message_content = await process_commands(data)
+        try:
+            message_content = await asyncio.wait_for(
+                process_commands(data), timeout=8.0
+            )
+        except asyncio.TimeoutError:
+            logger.error(">> Command processing timed out")
+            message_content = "Hmm... something went wrong. The command took too long to process. Please try again later"
+        except Exception as e:
+            logger.error(f">> An error occurred while processing the command: {e}")
+            message_content = "Hmm... an unexpected error occurred while processing your command. Please try again later"
 
         # Interaction Callback Type 4 : Respond to interaction with message
         response_data = {"type": 4, "data": {"content": message_content}}
