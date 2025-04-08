@@ -17,11 +17,13 @@ async def weather(option: str, *args) -> str:
         country = args[1] if args[1] is not None else ""
 
         if regex.match(r"^[\p{L} ,'$$.-]+$", location, regex.IGNORECASE) is None:
-            return "Hmm... Something went wrong. Please check your spelling and try again."
-        
+            return (
+                "Hmm... Something went wrong. Please check your spelling and try again."
+            )
+
         if location.lower() == "antarctica":
             geo_data = (-78.1586, 16.4063, "Antarctica", "AQ")
-            return await get_forecast(geo_data)  
+            return await get_forecast(geo_data)
 
         geo_data = await get_geodata(location, country)
         if geo_data == (None, None, None, None):
@@ -57,7 +59,9 @@ def create_code_country_dict() -> dict:
 
 async def get_geodata(location: str, country: str) -> tuple:
     if country:
-        country_code = country if get_country_by_code(country) else search_country_code(country)
+        country_code = (
+            country if get_country_by_code(country) else search_country_code(country)
+        )
     query = f"{location},{country_code}" if country else f"{location}"
     GEO_URL = f"http://api.openweathermap.org/geo/1.0/direct?q={query}&limit=1&appid={WEATHER_API_KEY}"
     response = requests.get(GEO_URL)
@@ -137,23 +141,25 @@ async def get_forecast(geo_data) -> str:
     weather_icon = get_weather_icon(weather_id, weather_condition)
     flag = f":flag_{country_code.lower()}:"
     country = code_country_map.get(country_code) or country_code
-    
+
     #  May not always return an icon for weather condition output
-    condition_out = f"{weather_icon} **{description}**" if weather_icon else f"**{description}**"
+    condition_out = (
+        f"{weather_icon} `{description}`" if weather_icon else f"`{description}`"
+    )
 
     out = (
-        f"> Weather in {flag} **{location}**, ***{country}***\n"
-        f"***Temperature***: **{temp}°C** ( Feels like {temperature_icon} **{feels_like}°C** )\n"
+        f"> Current weather in {flag} **{location}**, ***{country}***\n"
+        f"***Temperature***: `{temp}°C` ( Feels like {temperature_icon} `{feels_like}°C` )\n"
         f"***Condition***: {condition_out}\n"
-        f"***Humidity***: :sweat_drops: **{humidity}%**\n"
-        f"***Wind Speed***: :dash: **{wind_speed} m/s**\n"
-        f"***Cloudiness***: :cloud: **{cloudiness}%**\n"
+        f"***Humidity***: :sweat_drops: `{humidity}%`\n"
+        f"***Wind Speed***: :dash: `{wind_speed} m/s`\n"
+        f"***Cloudiness***: :cloud: `{cloudiness}%`\n"
     )
 
     if rain:
-        out += f"***Precipitation***: :droplet: **{rain} mm/h**\n"
+        out += f"***Precipitation***: :droplet: `{rain} mm/h`\n"
     if snow:
-        out += f"***Snow***: :snowflake: **{snow} mm/h**\n"
+        out += f"***Snow***: :snowflake: `{snow} mm/h`\n"
     return out
 
 

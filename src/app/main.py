@@ -33,14 +33,20 @@ def get_subcmd(data):
     return data["options"][0]["name"]
 
 
-def get_subcmd_value_at_index(data, index):
-    try:
-        return data["options"][0]["options"][index]["value"]
-    except IndexError:
-        return None
+def get_nested_value(data, keys, default=None):
+    for key in keys:
+        try:
+            data = data[key]
+        except (KeyError, IndexError, TypeError):
+            return default
+    return data
 
 
 def handle_timestamp(data):
+    message_content = (
+        "Uh oh! An error occurred with the timestamp command. Please try again later."
+    )
+
     sub_command = get_subcmd(data)
     if sub_command == "search":
         if not data["options"][0].get("options"):
@@ -52,35 +58,37 @@ def handle_timestamp(data):
         value = data["options"][0]["options"][0]["value"]
         if search_field == "code" and len(value) != 2:
             return "Hmm... something went wrong. Please use a valid input e.g. ***FJ***"
-        elif search_field == "country":
-            message_content = timestamp("search", value)
+
+        logger.info(">> Performing search from timestamp command")
+        message_content = timestamp("search", value)
 
     elif sub_command == "create":
-        date_str = data["options"][0]["options"][0]["value"]
-        time_str = data["options"][0]["options"][1]["value"]
-        tz_str = data["options"][0]["options"][2]["value"]
-        message_content = timestamp("create", date_str, time_str, tz_str)
+        date = get_nested_value(data, ["options", 0, "options", 0, "value"])
+        time = get_nested_value(data, ["options", 0, "options", 1, "value"])
+        tz = get_nested_value(data, ["options", 0, "options", 2, "value"])
+        logger.info(">> Generating timestamp")
+        message_content = timestamp("create", date, time, tz)
 
     return message_content
 
 
 async def handle_weather(data):
-    sub_cmd_group = data["options"][0]["name"]
-    sub_cmd_group_options = data["options"][0]
     message_content = (
         "Uh oh! An error occurred with the weather command. Please try again later."
     )
 
-    if sub_cmd_group == "info":
-        sub_command = get_subcmd(sub_cmd_group_options)
-        if sub_command == "forecast":
-            location = get_subcmd_value_at_index(sub_cmd_group_options, 0)
-            country = get_subcmd_value_at_index(sub_cmd_group_options, 1)
-            message_content = await weather("forecast", location, country)
+    sub_command = get_subcmd(data)
+    if sub_command == "forecast":
+        location = get_nested_value(data, ["options", 0, "options", 0, "value"])
+        country = get_nested_value(data, ["options", 0, "options", 1, "value"])
+        logger.info(">> Getting weather forecast")
+        message_content = await weather("forecast", location, country)
 
-        elif sub_command == "search":
-            country = get_subcmd_value_at_index(sub_cmd_group_options, 0)
-            message_content = await weather("search", country)
+    elif sub_command == "search":
+        country = get_nested_value(data, ["options", 0, "options", 0, "value"])
+        logger.info(">> Searching country code")
+        message_content = await weather("search", country)
+
     return message_content
 
 
@@ -167,7 +175,7 @@ async def interact(raw_request):
     if not await update_original_interaction_reponse(
         interaction_token, message_content
     ):
-        logger.info(">> Error updating original interaction response")
+        logger.error(">>>> Error updating original interaction response")
 
     return jsonify(response_data)
 

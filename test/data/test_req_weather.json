@@ -3,31 +3,23 @@
   "data": {
     "id": "some command ID",
     "name": "weather",
-    "type": 1,
     "options": [
       {
-        "name": "info",
-        "description": "Weather information commands",
-        "type": 2,
+        "name": "forecast",
+        "description": "Get the forecast for a location by country",
+        "type": 1,
         "options": [
           {
-            "name": "forecast",
-            "description": "Get the forecast for a location by country",
-            "type": 1,
-            "options": [
-              {
-                "name": "location",
-                "description": "The location for the weather forecast",
-                "value": "L'Haÿ-les-Roses",
-                "type": 3
-              },
-              {
-                "name": "country",
-                "description": "The country code of the location (e.g. AQ for Antarctica)",
-                "value": "fr",
-                "type": 3
-              }
-            ]
+            "name": "location",
+            "description": "The location for the weather forecast",
+            "value": "L'Haÿ-les-Roses",
+            "type": 3
+          },
+          {
+            "name": "code",
+            "description": "The country code of the location (e.g. AQ for Antarctica)",
+            "value": "fr",
+            "type": 3
           }
         ]
       }
