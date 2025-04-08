@@ -22,11 +22,12 @@ def timestamp(option: str, *args) -> str:
             return f"> The timezone(s) for **{value}** is{out}"
         # country -> code
         else:
+            prep = f"`{search_country_code(value)}`" if search_country_code(value) else ""
             out = (
-                search_country_code(value)
+                prep
                 or "undefined. Please check your spelling and try again"
             )
-            return f"> The country code for **{value}** is ***{out}***"
+            return f"> The country code for **{value}** is {out}"
 
     elif option == "create":
         date_str, time_str, tz_str = args
