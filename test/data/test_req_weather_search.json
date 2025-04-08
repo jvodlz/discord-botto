@@ -3,25 +3,17 @@
   "data": {
     "id": "some command ID",
     "name": "weather",
-    "type": 1,
     "options": [
       {
-        "name": "info",
-        "description": "Weather information commands",
-        "type": 2,
+        "name": "search",
+        "description": "Look up the country code of a country",
+        "type": 1,
         "options": [
           {
-            "name": "search",
-            "description": "Look up the country code of a country",
-            "type": 1,
-            "options": [
-              {
-                "name": "country",
-                "description": "The country to get the country code for",
-                "value": "falkland islands",
-                "type": 3
-              }
-            ]
+            "name": "country",
+            "description": "The country to get the country code for (e.g. United Kingdom)",
+            "value": "falkland islands",
+            "type": 3
           }
         ]
       }

@@ -63,6 +63,41 @@ Bootstrap the CDK
 Then, deploy
 - `cdk deploy`
 
+## Data
+The data used for this project were publicly sourced and were cleaned/transformed for this project. 
+
+### Country Codes
+- `iso_alpha` refers to the ISO 3166-1 alpha-2 country code (249 officially assigned)
+- `iso_currency_country_name` refers to the country name used in ISO 4217 currency codes
+- `common_name` refers to the name a country is commonly referred to
+
+> Countries were renamed to their commonly known names to allow for better usability 
+
+#### Some examples of renaming
+- Bolivia (Plurinational State of) `->` **Bolivia**
+- Cocos (Keeling) Islands `->` **Cocos Islands**
+- Congo `->` **Congo-Brazzaville**
+- Democratic Republic of the Congo `->` **Congo-Kinshasa**
+- Lao People's Democratic Republic `->` **Laos**
+- Republic of Korea `->` **South Korea**
+- Svalbard and Jan Mayen Islands -> **Svalbard and Jan Mayen**
+- Syrian Arab Republic `->` **Syria**
+- United States of America `->` **United States**
+- Viet Nam `->` **Vietnam**
+
+#### Special cases for `common_name` (Spelling)
+- Åland Islands
+- Côte d'Ivoire
+- Curaçao
+
+### Time Zones
+- `zone_name` refers to the TZ identifier from the [tz database](https://en.wikipedia.org/wiki/Tz_database)
+
+#### Unlisted tzdata
+- **BV** - *Bouvet Island*
+- **HM** - *Heard Island and McDonald Islands*
+- **EH** - *Western Sahara*
+
 ## Security
 ### Discord Interaction Requests
 User interactions with the bot requires validation using 
@@ -74,5 +109,8 @@ User interactions with the bot requires validation using
 - [zenquotes.io](https://zenquotes.io/api/random)
 - [stoic-quotes.com](https://stoic-quotes.com/api/quote)
 - [OpenWeather](https://openweathermap.org)
-### Country Codes Data
-The Country Codes were sourced from [SimpleMaps](https://simplemaps.com/data/world-cities). The data was cleaned and transformed for this project. This data is licensed under the Creative Commons Attribution 4.0 International License.
+
+### Data
+- [Country Codes](https://github.com/datasets/country-codes/tree/main/data)
+- [Time Zones](https://timezonedb.com/download)
+
