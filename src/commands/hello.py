@@ -18,6 +18,6 @@ def greet():
     if lang != "English":
         return (
             out
-            + f"\nI just said ***'{greetings['English'][greet_index]}'*** in **{lang}**, if you're at all curious"
+            + f"\nJust threw a little ***'{greetings['English'][greet_index]}'*** in **{lang}** your way— curious if you caught it!"
         )
     return out
