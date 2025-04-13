@@ -63,6 +63,6 @@
           type: 3
           required: true
         - name: timezone
-          description: The timezone (e.g. Europe/Zurich)
+          description: The timezone (e.g. Europe/Zurich or Europe/San_Marino)
           type: 3
           required: true
