@@ -24,7 +24,7 @@
           },
           {
             "name": "timezone",
-            "description": "The timezone (e.g. Europe/Zurich)",
+            "description": "The timezone (e.g. Europe/Zurich or Europe/San_Marino)",
             "value": "Australia/Melbourne",
             "type": 3
           }
