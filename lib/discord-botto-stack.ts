@@ -36,6 +36,11 @@ export class DiscordBottoStack extends cdk.Stack {
       }
     });
 
+    dockerFunction.addPermission("AllowPublicInvoke", {
+      principal: new cdk.aws_iam.AnyPrincipal(),
+      action: "lambda:InvokeFunction",
+    });
+
     new cdk.CfnOutput(this, "FunctionUrl", {
       value: functionUrl.url
     });
